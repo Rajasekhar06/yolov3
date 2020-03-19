@@ -33,7 +33,7 @@ class Model_Server():
         self.img_size=960
         self.conf_thres=0.2
         self.iou_thres=0.5
-        self.device='0'
+        self.device='cpu'
         self.model = Darknet(self.cfg, self.img_size)
         load_darknet_weights(self.model, self.weights)
     def detect(self, save_img=False):
@@ -115,14 +115,14 @@ class Model_Server():
 MS = Model_Server()
 @app.route('/predict',methods=['GET','POST'])
 def Model_Response():
-    type = request.files['file'].filename.split('.')[1]
-    imPath = '/home/dell/Documents/Rajashekar/yolov3/input/{}.{}'.format(time.strftime("%Y%m%d-%H%M%S%s"),type)
     # image = request.files['file'].read()
     for uploaded in request.files.getlist("file"):
+        type = uploaded.filename.split('.')[1]#request.files['file'].filename.split('.')[1]
+        imPath = '/home/dell/Documents/Rajashekar/yolov3/input/{}.{}'.format(time.strftime("%Y%m%d-%H%M%S%s"),type)
         print(uploaded,imPath)
         uploaded.save(imPath)
     
-    fileName = 'output'+ os.sep + os.path.basename(imPath)
+        fileName = 'output'+ os.sep + os.path.basename(imPath)
     MS.source = imPath
     with torch.no_grad():
         result = MS.detect(save_img=True)
